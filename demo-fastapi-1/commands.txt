@@ -1,0 +1,24 @@
+
+#To build  image:
+
+docker build -t scoring-app .
+
+
+
+#To run image and forward port:
+
+docker run -p 8866:8866 scoring-app
+
+
+
+#To try /predict endpoint:
+
+curl -X POST http://localhost:8866/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loan_usd" : 5000,
+    "person_age": 30,
+    "total_income_usd": 60000,
+    "has_high_education": true,
+    "has_children": false
+  }'
