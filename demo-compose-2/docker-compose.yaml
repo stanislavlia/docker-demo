@@ -1,0 +1,58 @@
+services:
+
+  postgres-service:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    networks:
+      - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+  pgadmin-service:
+    image: dpage/pgadmin4:9.1.0
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-service
+    networks:
+      - my-network
+
+  app-service:
+    image: my-ml-app:dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8866:8866"
+    environment:
+      PG_HOST: postgres-service
+      PG_PORT: 5432
+      PG_USER: user
+      PG_DATABASE: mydb
+      PG_PASSWORD: mypassword
+    depends_on:
+      - postgres-service
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
+
+
+# volumes:
+#   pgdata:
